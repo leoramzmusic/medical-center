@@ -1,0 +1,53 @@
+-- Crear la base de datos
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'ConsultorioDB')
+BEGIN
+    CREATE DATABASE ConsultorioDB;
+END
+GO
+
+USE ConsultorioDB;
+GO
+
+-- Tabla Doctores
+CREATE TABLE Doctores (
+    id_medico INT IDENTITY(1,1) PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido_paterno VARCHAR(100) NOT NULL,
+    apellido_materno VARCHAR(100) NOT NULL,
+    especialidad VARCHAR(100) NOT NULL
+);
+
+-- Tabla Consultorios
+CREATE TABLE Consultorios (
+    id_consultorio INT IDENTITY(1,1) PRIMARY KEY,
+    numero_consultorio INT NOT NULL UNIQUE,
+    piso INT NOT NULL
+);
+
+-- Tabla Citas
+CREATE TABLE Citas (
+    id_cita INT IDENTITY(1,1) PRIMARY KEY,
+    consultorio_id INT NOT NULL,
+    medico_id INT NOT NULL,
+    horario_consulta DATETIME NOT NULL,
+    nombre_paciente VARCHAR(100) NOT NULL,
+    CONSTRAINT FK_Cita_Consultorio FOREIGN KEY (consultorio_id) REFERENCES Consultorios(id_consultorio),
+    CONSTRAINT FK_Cita_Medico FOREIGN KEY (medico_id) REFERENCES Doctores(id_medico)
+);
+
+-- Índices para optimizar búsquedas en Citas
+CREATE INDEX IDX_Cita_Horario ON Citas(horario_consulta);
+CREATE INDEX IDX_Cita_Medico_Horario ON Citas(medico_id, horario_consulta);
+CREATE INDEX IDX_Cita_Consultorio_Horario ON Citas(consultorio_id, horario_consulta);
+CREATE INDEX IDX_Cita_Paciente_Horario ON Citas(nombre_paciente, horario_consulta);
+
+-- Registros de ejemplo 
+INSERT INTO Doctores (nombre, apellido_paterno, apellido_materno, especialidad) VALUES
+('Carlos', 'Sanchez', 'Rodriguez', 'Cardiología'),
+('Ana', 'Gomez', 'Lopez', 'Pediatría'),
+('Luis', 'Martinez', 'Fernandez', 'General');
+
+INSERT INTO Consultorios (numero_consultorio, piso) VALUES
+(101, 1),
+(102, 1),
+(201, 2);
